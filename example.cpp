@@ -2,7 +2,8 @@
 
 #include "src/unique_ref.hpp"
 //
-using unique_ref::uref;
+using unique_ref::uref; // unique reference
+using unique_ref::ucref; // unique reference only for concrete types
 
 class XAbstract
 {
@@ -35,12 +36,13 @@ uref<Incomplete> UseIncomplete::r{Incomplete{}};
 
 int main()
 {
-   uref<XConcrete> refX{XConcrete{}};
+   ucref<XConcrete> refX{XConcrete{}};
    int y = refX->x;
 
    XConcrete c1 = *refX; // copy
-   //XConcrete c2 = refX;  // copy (without operator*... easy!) - NOT allowed anymore, to support 'Incomplete' types.
+   XConcrete c2 = refX;  // copy without operator*... nice! only possible on 'ucref' type
 
+   // cannot use 'ucref' for abstract types! use general 'uref'
    uref<XAbstract> refXA{std::unique_ptr<XAbstract>{new XConcrete{}}};
 
    XAbstract &c3 = *refXA; // ok, reference passing

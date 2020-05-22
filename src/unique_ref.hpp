@@ -82,6 +82,54 @@ public:
 */
 };
 
+// ============= ucref class =============
+// this can ONLY be used for CONCRETE classes (non-abstract)
+// why not using a single "unified" uref and ucref?
+// the reason is that 'ucref' is safer, no chance to receive
+//   some unique_ptr which is null, and has a nice conversion
+//   operator T(), that cannot be made for abstract (since SFINAE
+//   guards against 'is_abstract', but not against incomplete type)
+
+template<class T>
+class ucref final // 'ucref' can only be used for concrete classes
+{
+private:
+   std::unique_ptr<T> _t;
+
+public:
+   // 'make_unique' requires concrete type T
+   explicit ucref(const ucref<T>&& other) noexcept
+     : _t{ std::make_unique<T>(std::move(*other._t)) }
+   {
+   }
+
+   // 'make_unique' requires concrete type T
+   explicit ucref(const ucref<T>& other) noexcept
+     : _t{ std::make_unique<T>(*other._t) }
+   {
+   }
+
+   // 'make_unique' requires concrete type T
+   explicit ucref(const T& t) noexcept
+     : _t{ std::make_unique<T>(t) }
+   {
+   }
+
+   T& ref() { return *_t; }
+   const T& ref() const { return *_t; }
+
+   // returns pointer (beware to not break element!)
+   T* operator->() { return _t.get(); }
+   const T* operator->() const { return _t.get(); }
+
+   // returns reference (beware to not break element!)
+   T& operator*() { return *_t; }
+   const T& operator*() const { return *_t; }
+
+   // no need to SFINAE protection here... T must be concrete!
+   operator T() const { return std::move(T{ *_t }); } // returns copy/move
+};
+
 //
 } // namespace unique_ref
 //

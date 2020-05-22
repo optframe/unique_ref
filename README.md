@@ -14,6 +14,11 @@ This should be used when you cannot really stack alloc your object, but still do
 to use a pointer... if you use `uref` we will manage the memory for you (using `std::unique_ptr`
   in the background).
 
+## Use `uref` or `ucref`?
+
+Note that one can use `ucref` if you have concrete type. 
+This is safer and allows a nice conversion operator (not possible on `uref`).
+
 ## C++ Requirements
 
 C++14 standard is required (for `make_unique`).
